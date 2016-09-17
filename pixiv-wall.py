@@ -17,7 +17,7 @@ def main ():
           Chrome/52.0.2743.82 Safari/537.36'  # Chrome on win10
     requestSession.headers.update({'User-Agent': UA,'Referer':"http://www.pixiv.net/"})
 
-    phtml = urllib.request.urlopen("http://www.pixiv.net/").read()
+    phtml = urllib.request.urlopen("http://www.pixiv.net/", timeout=5).read()
     soup = BeautifulSoup(phtml, "html.parser")
     pjson = soup.find("input",attrs={"class": "json-data"})
     pdejson = demjson.decode(pjson['value'])
@@ -38,7 +38,7 @@ def main ():
         retry_max = 5
         while True:
           try:
-              downloadRequest = requestSession.get(imgUrl, stream=True, timeout=2)
+              downloadRequest = requestSession.get(imgUrl, stream=True, timeout=5)
               with open(imgPath, 'wb') as f:
                   for chunk in downloadRequest.iter_content(chunk_size=1024):
                       if chunk: # filter out keep-alive new chunks
@@ -78,15 +78,16 @@ def main ():
             count -= 1
             continue
 
-        print(p['illust_id'])
-        print(p['illust_title'])
-        print(p['url']['1200x1200'])
-        print(p['user_name'])
-        print(p['profile_img']['main_s'])
+        #print(p['illust_id'])
+        #print(p['illust_title'])
+        #print(p['url']['1200x1200'])
+        #print(p['user_name'])
+        #print(p['profile_img']['main_s'])
         download_thread = threading.Thread(target=__download_one_img,
                                            args=(p['url']['1200x1200'], imgPath, __download_callback))
         download_threads.append(download_thread)
         download_thread.start()
+        
     [t.join() for t in download_threads]
     print('完毕!\n')
 
